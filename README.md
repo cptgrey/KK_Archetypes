@@ -1,11 +1,13 @@
 # KK_Archetypes
+
+# <img src= "https://raw.githubusercontent.com/cptgrey/KK_Archetypes/master/Assets/KKAT1.gif">
 KK_Archetypes allows you to favorite different character parts and recombine them into new characters. 
 
 ## Guide
 There are options to save features from the current character in the maker.
 - Hair / Face / Eyes options are in the face menu
 - Body options are in the body menu
-- Main options (including add all options) are in the parameter menu (heart)
+- Main options (including add all options) are in the parameter menu (heart icon)
 
 ## Hotkeys
 Using hotkeys allows you to add parts from the character select screen in the Maker without loading a specific character. They can be found and set in the plugins menu. (Press F1 and click plugin options, and navigate to KK Character Archetypes) 
