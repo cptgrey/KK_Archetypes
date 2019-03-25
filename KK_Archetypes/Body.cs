@@ -7,6 +7,8 @@ namespace KK_Archetypes
     internal class Body
     {
 
+        // For documentation, see KK_Archetypes.Hair, these methods are basically the same.
+
         protected static void SkinWriter(ChaFileBody fromBody, ChaFileFace fromFace, ChaFileBody toBody, ChaFileFace toFace)
         {
             toBody.skinMainColor = fromBody.skinMainColor;
@@ -48,85 +50,84 @@ namespace KK_Archetypes
             to.shapeValueBody = from.shapeValueBody;
         }
 
-        internal static void AddSkin(ChaFileBody currBody, ChaFileFace currFace, KKATData data)
+        internal static void AddSkin(ChaFileBody currBody, ChaFileFace currFace)
         {
             ChaFileBody addBody = new ChaFileBody();
             ChaFileFace addFace = new ChaFileFace();
             SkinWriter(currBody, currFace, addBody, addFace);
-            data.SkinBody.Add(addBody);
-            data.SkinFace.Add(addFace);
+            KK_Archetypes.Data.SkinBody.Add(addBody);
+            KK_Archetypes.Data.SkinFace.Add(addFace);
         }
 
-        internal static void AddArchetypeSkinFromSelected(KKATData data)
+        internal static void AddArchetypeSkinFromSelected()
         {
+            if (!MakerAPI.InsideAndLoaded) return;
             ChaFileCustom custom = Utilities.GetSelectedCharacter().custom;
             ChaFileBody currBody = custom.body;
             ChaFileFace currFace = custom.face;
-            AddSkin(currBody, currFace, data);
+            AddSkin(currBody, currFace);
             Utilities.IncrementSelectIndex();
             Utilities.PlaySound();
         }
 
-        internal static void AddArchetypeSkin(KKATData data)
+        internal static void AddArchetypeSkin()
         {
             ChaFileCustom custom = MakerAPI.GetCharacterControl().chaFile.custom;
             ChaFileBody currBody = custom.body;
             ChaFileFace currFace = custom.face;
-            AddSkin(currBody, currFace, data);
+            AddSkin(currBody, currFace);
             Utilities.PlaySound();
         }
 
-        internal static void AddBody(ChaFileBody curr, KKATData data, bool fromSelected = false)
+        internal static void AddBody(ChaFileBody curr, bool fromSelected = false)
         {
             ChaFileBody add = new ChaFileBody();
             List<BoneModifier> addbones = new List<BoneModifier>();
             List<BoneModifier> modifiers = fromSelected ? Utilities.GetBoneModifiersFromCard() : MakerAPI.GetCharacterControl().GetComponent<BoneController>().Modifiers;
             for (int i = 0; i < modifiers.Count; i++) addbones.Add(modifiers[i]);
             BodyWriter(curr, add);
-            data.Body.Add(add);
-            data.Bones.Add(addbones);
+            KK_Archetypes.Data.Body.Add(add);
+            KK_Archetypes.Data.Bones.Add(addbones);
         }
 
-        internal static void AddArchetypeBodyFromSelected(KKATData data)
+        internal static void AddArchetypeBodyFromSelected()
         {
+            if (!MakerAPI.InsideAndLoaded) return;
             ChaFileBody curr = Utilities.GetSelectedCharacter().custom.body;
-            AddBody(curr, data, true);
+            AddBody(curr, true);
             Utilities.IncrementSelectIndex();
             Utilities.PlaySound();
         }
 
-        internal static void AddArchetypeBody(KKATData data)
+        internal static void AddArchetypeBody()
         {
             ChaFileBody curr = MakerAPI.GetCharacterControl().chaFile.custom.body;
-            AddBody(curr, data);
+            AddBody(curr);
             Utilities.PlaySound();
         }
 
-        internal static void GetRandomArchetypeSkin(KKATData data)
+        internal static void LoadRandomArchetypeSkin()
         {
-            if (data.SkinBody.Count != data.SkinFace.Count || data.SkinFace.Count == 0) return;
-            int randidx = Utilities.Rand.Next(data.SkinFace.Count);
-            ChaFileBody addBody = data.SkinBody[randidx];
-            ChaFileFace addFace = data.SkinFace[randidx];
+            if (!MakerAPI.InsideAndLoaded) return;
+            if (KK_Archetypes.Data.SkinBody.Count != KK_Archetypes.Data.SkinFace.Count || KK_Archetypes.Data.SkinFace.Count == 0) return;
+            int randidx = Utilities.Rand.Next(KK_Archetypes.Data.SkinFace.Count);
+            ChaFileBody addBody = KK_Archetypes.Data.SkinBody[randidx];
+            ChaFileFace addFace = KK_Archetypes.Data.SkinFace[randidx];
             ChaFile file = MakerAPI.GetCharacterControl().chaFile;
             ChaFileBody currBody = file.custom.body;
             ChaFileFace currFace = file.custom.face;
             SkinWriter(addBody, addFace, currBody, currFace);
-            if (!KK_Archetypes.AllFlag)
-            {
-                MakerAPI.GetCharacterControl().Reload();
-                Utilities.PlaySound();
-            }
+            Utilities.FinalizeLoad();
         }
 
-        internal static void GetRandomArchetypeBody(KKATData data)
+        internal static void LoadRandomArchetypeBody()
         {
-            if (data.Body.Count == 0) return;
-            int randidx = Utilities.Rand.Next(data.Body.Count);
-            ChaFileBody add = data.Body[randidx];
-            List<BoneModifier> addbones = data.Bones[randidx];
-            ChaControl chaControl = MakerAPI.GetCharacterControl();
-            ChaFile file = MakerAPI.GetCharacterControl().chaFile;
+            if (!MakerAPI.InsideAndLoaded) return;
+            if (KK_Archetypes.Data.Body.Count == 0) return;
+            int randidx = Utilities.Rand.Next(KK_Archetypes.Data.Body.Count);
+            ChaFileBody add = KK_Archetypes.Data.Body[randidx];
+            List<BoneModifier> addbones = KK_Archetypes.Data.Bones[randidx];
+            ChaFileBody curr = MakerAPI.GetCharacterControl().chaFile.custom.body;
             var controller = MakerAPI.GetCharacterControl().GetComponent<BoneController>();
             while (controller.Modifiers.Count > 0)
             {
@@ -137,13 +138,8 @@ namespace KK_Archetypes
             {
                 controller.AddModifier(addbones[i]);
             }
-            ChaFileBody curr = file.custom.body;
             BodyWriter(add, curr);
-            if (!KK_Archetypes.AllFlag)
-            {
-                MakerAPI.GetCharacterControl().Reload();
-                Utilities.PlaySound();
-            }
+            Utilities.FinalizeLoad();
         }
     }
 }

@@ -2,6 +2,7 @@
 using Harmony;
 using KKAPI;
 using KKAPI.Maker;
+using ExtensibleSaveFormat;
 using KKABMX.Core;
 using System.ComponentModel;
 
@@ -9,22 +10,23 @@ namespace KK_Archetypes
 {
     [BepInDependency(KoikatuAPI.GUID)]
     [BepInDependency(KKABMX_Core.GUID)]
+    [BepInDependency(ExtendedSave.GUID)]
     [BepInPlugin(GUID, PluginName, Version)]
     public class KK_Archetypes : BaseUnityPlugin
     {
         public const string GUID = "com.cptgrey.bepinex.archetypes";
         public const string PluginName = "KK Character Archetypes";
         public const string PluginNameInternal = "KK_Archetypes";
-        public const string Version = "0.4";
+        public const string Version = "0.9";
 
-        internal static KKATData Data = KKATData.LoadFromFile();
+        internal static KKATData Data = KKATData.GetFromFile();
         internal static bool AllFlag = false;
         private static UI _UI = new UI();
 
         [DisplayName("Increment Character Selector")]
         [Description("Increment the selected character in the maker when using hotkeys.\n" +
             "NOTE: The incrementation follows an alphabetical descending order,\n" +
-             "not necessarily the order the characters are in on screen! (Slightly buggy)")]
+            "not necessarily the order the characters are in on screen! (Slightly buggy)")]
         public static ConfigWrapper<bool> IncrementFlag { get; internal set; }
 
         [DisplayName("Add Hairstyle Hotkey")]
@@ -50,31 +52,34 @@ namespace KK_Archetypes
 
 
         [DisplayName("Get Hairstyle Hotkey")]
-        public static SavedKeyboardShortcut GetHairstyleHotkey { get; internal set; }
+        public static SavedKeyboardShortcut LoadHairstyleHotkey { get; internal set; }
         [DisplayName("Get Haircolor Hotkey")]
-        public static SavedKeyboardShortcut GetHaircolorHotkey { get; internal set; }
+        public static SavedKeyboardShortcut LoadHaircolorHotkey { get; internal set; }
         [DisplayName("Get Eyecolor Hotkey")]
-        public static SavedKeyboardShortcut GetEyecolorHotkey { get; internal set; }
+        public static SavedKeyboardShortcut LoadEyecolorHotkey { get; internal set; }
         [DisplayName("Get Eyeline Hotkey")]
-        public static SavedKeyboardShortcut GetEyelineHotkey { get; internal set; }
+        public static SavedKeyboardShortcut LoadEyelineHotkey { get; internal set; }
         [DisplayName("Get Eyebrow Hotkey")]
-        public static SavedKeyboardShortcut GetEyebrowHotkey { get; internal set; }
+        public static SavedKeyboardShortcut LoadEyebrowHotkey { get; internal set; }
         [DisplayName("Get Face Hotkey")]
-        public static SavedKeyboardShortcut GetFaceHotkey { get; internal set; }
+        public static SavedKeyboardShortcut LoadFaceHotkey { get; internal set; }
         [DisplayName("Get Skin Hotkey")]
-        public static SavedKeyboardShortcut GetSkinHotkey { get; internal set; }
+        public static SavedKeyboardShortcut LoadSkinHotkey { get; internal set; }
         [DisplayName("Get Body Hotkey")]
-        public static SavedKeyboardShortcut GetBodyHotkey { get; internal set; }
+        public static SavedKeyboardShortcut LoadBodyHotkey { get; internal set; }
         [DisplayName("Get All Hotkey")]
-        public static SavedKeyboardShortcut GetAllHotkey { get; internal set; }
+        public static SavedKeyboardShortcut LoadAllHotkey { get; internal set; }
 
-
+        void Start()
+        {
+            // Check for KKABMX version, not really necessary (?).
+            // if (KoikatuAPI.CheckRequiredPlugin(this, KKABMX_Core.GUID, new Version(KoikatuAPI.VersionConst), LogLevel.Warning)) return;
+            var harmony = HarmonyInstance.Create(GUID);
+            harmony.PatchAll(typeof(KK_Archetypes));
+        }
 
         void Main()
         {
-            var harmony = HarmonyInstance.Create(GUID);
-            harmony.PatchAll(typeof(KK_Archetypes));
-
             // Set menu subcategory callback
             MakerAPI.RegisterCustomSubCategories += _UI.Archetype_Maker_UI_Menu;
         }
@@ -84,29 +89,40 @@ namespace KK_Archetypes
             _UI.Update();
         }
 
-        internal static void ResetData()
+        /// <summary>
+        /// Clear current KKATData.
+        /// </summary>
+        internal static void ClearData()
         {
             Data = new KKATData();
             Utilities.PlaySound();
         }
 
+        /// <summary>
+        /// Reload previously saved KKATData.
+        /// </summary>
         internal static void ReloadData()
         {
-            Data = KKATData.LoadFromFile();
+            Data = KKATData.GetFromFile();
             Utilities.PlaySound();
         }
 
+        /// <summary>
+        /// Add all parts from the selected / current head.
+        /// </summary>
+        /// <param fromSelected=false>Flag for loading by hotkeys in character list</param>
         internal static void AddAllArchetypesHead(bool fromSelected = false)
         {
+            if (!MakerAPI.InsideAndLoaded) return;
             ChaFile file = fromSelected ? Utilities.GetSelectedCharacter() : MakerAPI.GetCharacterControl().chaFile;
             ChaFileHair hair = file.custom.hair;
             ChaFileFace face = file.custom.face;
-            Hair.AddHairStyle(hair, Data);
-            Hair.AddHairColor(hair, Data);
-            Eyes.AddEyeColor(face, Data);
-            Eyes.AddEyeline(face, Data);
-            Face.AddEyebrow(face, Data);
-            Face.AddFace(face, Data);
+            Hair.AddHairStyle(hair);
+            Hair.AddHairColor(hair);
+            Eyes.AddEyeColor(face);
+            Eyes.AddEyeline(face);
+            Face.AddEyebrow(face);
+            Face.AddFace(face);
             if (fromSelected)
             {
                 Utilities.IncrementSelectIndex();
@@ -114,13 +130,18 @@ namespace KK_Archetypes
             Utilities.PlaySound();
         }
 
+        /// <summary>
+        /// Add all parts from the selected / current body.
+        /// </summary>
+        /// <param fromSelected=false>Flag for loading by hotkeys in character list</param>
         internal static void AddAllArchetypesBody(bool fromSelected = false)
         {
+            if (!MakerAPI.InsideAndLoaded) return;
             ChaFile file = fromSelected ? Utilities.GetSelectedCharacter() : MakerAPI.GetCharacterControl().chaFile;
             ChaFileBody body = file.custom.body;
             ChaFileFace face = file.custom.face;
-            Body.AddSkin(body, face, Data);
-            Body.AddBody(body, Data, fromSelected);
+            Body.AddSkin(body, face);
+            Body.AddBody(body, fromSelected);
             if (fromSelected)
             {
                 Utilities.IncrementSelectIndex();
@@ -128,17 +149,21 @@ namespace KK_Archetypes
             Utilities.PlaySound();
         }
 
-        internal static void GetAllArchetypes()
+        /// <summary>
+        /// Load completely randomized character from KKATData.
+        /// </summary>
+        internal static void LoadAllArchetypes()
         {
+            if (!MakerAPI.InsideAndLoaded) return;
             AllFlag = true;
-            Hair.GetRandomArchetypeHairStyle(Data);
-            Hair.GetRandomArchetypeHairColor(Data);
-            Eyes.GetRandomArchetypeEyeColor(Data);
-            Eyes.GetRandomArchetypeEyeline(Data);
-            Face.GetRandomArchetypeEyebrow(Data);
-            Face.GetRandomArchetypeFace(Data);
-            Body.GetRandomArchetypeSkin(Data);
-            Body.GetRandomArchetypeBody(Data);
+            Hair.LoadRandomArchetypeHairStyle();
+            Hair.LoadRandomArchetypeHairColor();
+            Eyes.LoadRandomArchetypeEyeColor();
+            Eyes.LoadRandomArchetypeEyeline();
+            Face.LoadRandomArchetypeEyebrow();
+            Face.LoadRandomArchetypeFace();
+            Body.LoadRandomArchetypeSkin();
+            Body.LoadRandomArchetypeBody();
             MakerAPI.GetCharacterControl().Reload();
             AllFlag = false;
             Utilities.PlaySound();

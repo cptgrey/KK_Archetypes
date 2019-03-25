@@ -27,11 +27,12 @@ Using hotkeys allows you to add parts from the character select screen in the Ma
 - Body (Skintype, KKABMX Bones, etc...)
 
 ## Saving / Reloading / Resetting Favorites
-Once you have added some favorite parts, you can save them for later use with in the parameters menu. There are also options for resetting / clearing the current list, and reloading the currently saved list.
+Once you have added some favorite parts, you can save them for later use within the parameters menu. There are also options for resetting / clearing the current list, and reloading the currently saved list.
 
 ## Planned additions:
-- Feature for saving favorite outfits
+- Feature for saving favorite outfits / coordinates
 - Option to view how many items are in the current favorites list
+- Option for favoriting custom overlays
 
 ## Thanks to:
 - ManlyMarco

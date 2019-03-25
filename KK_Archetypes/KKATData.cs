@@ -49,7 +49,10 @@ namespace KK_Archetypes
             Version = KK_Archetypes.Version;
         }
 
-        public void Save()
+        /// <summary>
+        /// Method to serialize data.
+        /// </summary>
+        public void SaveToFile()
         {
             if (!Directory.Exists("./BepInEx/KKAT/")) Directory.CreateDirectory("./BepInEx/KKAT/");
             using (var stream = new FileStream("./BepInEx/KKAT/KKAT_Data.xml", FileMode.Create))
@@ -58,7 +61,10 @@ namespace KK_Archetypes
             }
         }
 
-        public static KKATData LoadFromFile()
+        /// <summary>
+        /// Method to deserialize data.
+        /// </summary>
+        public static KKATData GetFromFile()
         {
             if (!File.Exists("./BepInEx/KKAT/KKAT_Data.xml")) return new KKATData();
             try

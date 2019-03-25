@@ -5,6 +5,13 @@ namespace KK_Archetypes
     class Face
     {
 
+        // For documentation, see KK_Archetypes.Hair, these methods are basically the same.
+
+        protected static void EyebrowWriter(ChaFileFace from, ChaFileFace to)
+        {
+            to.eyebrowId = from.eyebrowId;
+        }
+
         protected static void FaceWriter(ChaFileFace from, ChaFileFace to)
         {
             to.foregroundEyebrow = from.foregroundEyebrow;
@@ -13,76 +20,71 @@ namespace KK_Archetypes
             to.shapeValueFace = from.shapeValueFace;
         }
 
-        internal static void AddEyebrow(ChaFileFace curr, KKATData data)
+
+        internal static void AddEyebrow(ChaFileFace curr)
         {
             ChaFileFace add = new ChaFileFace();
-            add.eyebrowId = curr.eyebrowId;
-            data.Eyebrow.Add(add);
+            EyebrowWriter(curr, add);
+            KK_Archetypes.Data.Eyebrow.Add(add);
         }
 
-        internal static void AddArchetypeEyebrowFromSelected(KKATData data)
+        internal static void AddArchetypeEyebrowFromSelected()
         {
+            if (!MakerAPI.InsideAndLoaded) return;
             ChaFileFace curr = Utilities.GetSelectedCharacter().custom.face;
-            AddEyebrow(curr, data);
+            AddEyebrow(curr);
             Utilities.IncrementSelectIndex();
             Utilities.PlaySound();
         }
 
-        internal static void AddArchetypeEyebrow(KKATData data)
+        internal static void AddArchetypeEyebrow()
         {
             ChaFileFace curr = MakerAPI.GetCharacterControl().chaFile.custom.face;
-            AddEyebrow(curr, data);
+            AddEyebrow(curr);
             Utilities.PlaySound();
         }
 
-        internal static void AddFace(ChaFileFace curr, KKATData data)
+        internal static void AddFace(ChaFileFace curr)
         {
             ChaFileFace add = new ChaFileFace();
             FaceWriter(curr, add);
-            data.Face.Add(add);
+            KK_Archetypes.Data.Face.Add(add);
         }
 
-        internal static void AddArchetypeFaceFromSelected(KKATData data)
+        internal static void AddArchetypeFaceFromSelected()
         {
+            if (!MakerAPI.InsideAndLoaded) return;
             ChaFileFace curr = Utilities.GetSelectedCharacter().custom.face;
-            AddFace(curr, data);
+            AddFace(curr);
             Utilities.IncrementSelectIndex();
             Utilities.PlaySound();
         }
 
-        internal static void AddArchetypeFace(KKATData data)
+        internal static void AddArchetypeFace()
         {
             ChaFileFace curr = MakerAPI.GetCharacterControl().chaFile.custom.face;
-            AddFace(curr, data);
+            AddFace(curr);
             Utilities.PlaySound();
         }
 
-        internal static void GetRandomArchetypeEyebrow(KKATData data)
+        internal static void LoadRandomArchetypeEyebrow()
         {
-            if (data.Eyebrow.Count == 0) return;
-            ChaFileFace add = data.Eyebrow[Utilities.Rand.Next(data.Eyebrow.Count)];
-            ChaFile file = MakerAPI.GetCharacterControl().chaFile;
-            ChaFileFace curr = file.custom.face;
-            curr.eyebrowId = add.eyebrowId;
-            if (!KK_Archetypes.AllFlag)
-            {
-                MakerAPI.GetCharacterControl().Reload();
-                Utilities.PlaySound();
-            }
+            if (!MakerAPI.InsideAndLoaded) return;
+            if (KK_Archetypes.Data.Eyebrow.Count == 0) return;
+            ChaFileFace add = KK_Archetypes.Data.Eyebrow[Utilities.Rand.Next(KK_Archetypes.Data.Eyebrow.Count)];
+            ChaFileFace curr = MakerAPI.GetCharacterControl().chaFile.custom.face;
+            EyebrowWriter(add, curr);
+            Utilities.FinalizeLoad();
         }
 
-        internal static void GetRandomArchetypeFace(KKATData data)
+        internal static void LoadRandomArchetypeFace()
         {
-            if (data.Face.Count == 0) return;
-            ChaFileFace add = data.Face[Utilities.Rand.Next(data.Face.Count)];
-            ChaFile file = MakerAPI.GetCharacterControl().chaFile;
-            ChaFileFace curr = file.custom.face;
+            if (!MakerAPI.InsideAndLoaded) return;
+            if (KK_Archetypes.Data.Face.Count == 0) return;
+            ChaFileFace add = KK_Archetypes.Data.Face[Utilities.Rand.Next(KK_Archetypes.Data.Face.Count)];
+            ChaFileFace curr = MakerAPI.GetCharacterControl().chaFile.custom.face;
             FaceWriter(add, curr);
-            if (!KK_Archetypes.AllFlag)
-            {
-                MakerAPI.GetCharacterControl().Reload();
-                Utilities.PlaySound();
-            }
+            Utilities.FinalizeLoad();
         }
     }
 }
