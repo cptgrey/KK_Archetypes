@@ -20,13 +20,13 @@ The plugin adds a new subcategory to the Parameters menu (Heart Icon), where you
 ### The Quick Controls menu
 <img src= "https://raw.githubusercontent.com/cptgrey/KK_Archetypes/master/Assets/KKAT2.gif">
 
-In the Load Character and Load Outfit menu screens, you will find a Quick Access menu to the right side where you can quickly add items to your favorite list from the selected cards. The "Jump to Next" option even increments the selected card for you, to make it easier to add a lot of cards to your favorites collection. Outfits, with accessories, can be added from either Character cards or Coordinate cards. Or you could always add items from your current character from the Archetype submenu instead.
+In the Load Character and Load Outfit menu screens, you will find a Quick Access menu to the right side where you can quickly add items to your favorite list from the selected cards. The "Jump to Next" option increments the selected card for you, making it easier to quickly add parts from cards to your favorites collection. Outfits, with accessories, can be added from either Character cards or Coordinate cards. Or you could always add items from your current character from the Archetype submenu instead.
 
 
 ### Recombining new characters
 <img src= "https://raw.githubusercontent.com/cptgrey/KK_Archetypes/master/Assets/KKAT3.gif">
 
-When you have added enough parts to your favorite list, you can at any point recombine your favorite parts to a new character by going to the Archetype submenu, checking the parts you want to randomize, and click add parts. If you want to add a specific part, you can find all the parts you have added to your list in the Advanced Controls menu.
+When you have added enough parts to your favorite list, you can at any point recombine your favorite parts to a new character by going to the Archetype submenu, checking the parts you want to randomize, and clicking "Get Random From Favorite". If you want to add a specific part, you can find all the parts you have added to your list in the Advanced Controls menu.
 
 ## Parts
 ### Hair
