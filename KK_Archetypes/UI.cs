@@ -1,103 +1,388 @@
-﻿using BepInEx;
-using KKAPI.Maker;
+﻿using KKAPI.Maker;
 using KKAPI.Maker.UI;
+using UniRx;
 using UnityEngine;
 
 namespace KK_Archetypes
 {
     class UI
     {
-        private KeyCode[] CtrlShift = { KeyCode.LeftControl, KeyCode.LeftShift };
+        // Main instance of plugin, used to set ownership of elements in Maker menu for KKAPI
+        internal static KK_Archetypes KKAT_instance { get; set;}
 
+        // Subcategory menu for plugin
+        internal static MakerCategory FavoritesSubCat;
+
+        // Flags for showing UI menus
+        internal static bool showAvancedGUI { get; set; }
+        internal static bool showLoadGUI { get; set; } // Remnant from implementation of LoadToggles. Left for possible later implementation.
+
+        // Quick reference to Ctrl+Shift hotkey combination
+        internal static KeyCode[] CtrlShift = { KeyCode.LeftControl, KeyCode.LeftShift };
+
+        // Parameters for selectable entries in advanced control menu
+        private static KKATData.Category _currCategory = KKATData.Category.Hairstyle;
+        private static string _selected = null;
+        private static string _renameEntry = "";
+        private static GUIStyle _selectStyle = new GUIStyle();
+        private static GUIStyle _normalStyle = new GUIStyle();
+
+        // GUI Menu parameters
+        internal static Vector2 _scrollPos;
+        internal static Rect _advWindowRect;
+        internal static Rect _loadWindowRect;
+
+        private static float _xsizeAdv = Screen.width * .237f;
+        private static float _ysizeAdv = Screen.height * .29f;
+        private static float _xposAdv = Screen.width * .078f;
+        private static float _yposAdv = Screen.height * .68f;
+
+        private static float _xsizeLoad = Screen.width * .125f;
+        private static float _ysizeLoad = Screen.height * .2f;
+        private static float _xposLoad = Screen.width * .004f;
+        private static float _yposLoad = Screen.height * .33f;
+
+        /// <summary>
+        /// Initializer for Favorites UI.
+        /// </summary>
         internal UI()
         {
-            KK_Archetypes.IncrementFlag =         new ConfigWrapper<bool>("Increment Character Selector", KK_Archetypes.PluginNameInternal, false);
-            KK_Archetypes.AddHairstyleHotkey =    new SavedKeyboardShortcut("AddHairstyleHotkey", KK_Archetypes.PluginNameInternal, new KeyboardShortcut(KeyCode.A, CtrlShift));
-            KK_Archetypes.AddHaircolorHotkey =    new SavedKeyboardShortcut("AddHaircolorHotkey", KK_Archetypes.PluginNameInternal, new KeyboardShortcut(KeyCode.S, CtrlShift));
-            KK_Archetypes.AddEyebrowHotkey =      new SavedKeyboardShortcut("AddEyebrowHotkey",   KK_Archetypes.PluginNameInternal, new KeyboardShortcut(KeyCode.D, CtrlShift));
-            KK_Archetypes.AddEyelineHotkey =      new SavedKeyboardShortcut("AddEyelineHotkey",   KK_Archetypes.PluginNameInternal, new KeyboardShortcut(KeyCode.F, CtrlShift));
-            KK_Archetypes.AddEyecolorHotkey =     new SavedKeyboardShortcut("AddEyecolorHotkey",  KK_Archetypes.PluginNameInternal, new KeyboardShortcut(KeyCode.G, CtrlShift));
-            KK_Archetypes.AddFaceHotkey =         new SavedKeyboardShortcut("AddFaceHotkey",      KK_Archetypes.PluginNameInternal, new KeyboardShortcut(KeyCode.H, CtrlShift));
-            KK_Archetypes.AddSkinHotkey =         new SavedKeyboardShortcut("AddSkinHotkey",      KK_Archetypes.PluginNameInternal, new KeyboardShortcut(KeyCode.J, CtrlShift));
-            KK_Archetypes.AddBodyHotkey =         new SavedKeyboardShortcut("AddBodyHotkey",      KK_Archetypes.PluginNameInternal, new KeyboardShortcut(KeyCode.K, CtrlShift));
-            KK_Archetypes.AddAllHeadHotkey =      new SavedKeyboardShortcut("AddAllHeadHotkey",   KK_Archetypes.PluginNameInternal, new KeyboardShortcut(KeyCode.Q, CtrlShift));
-            KK_Archetypes.AddAllBodyHotkey =      new SavedKeyboardShortcut("AddAllBodyHotkey",   KK_Archetypes.PluginNameInternal, new KeyboardShortcut(KeyCode.W, CtrlShift));
+            KKAT_instance = Singleton<KK_Archetypes>.Instance;
+            showAvancedGUI = false;
+            showLoadGUI = true;
+            _advWindowRect = new Rect(_xposAdv, _yposAdv, _xsizeAdv, _ysizeAdv);
+            _loadWindowRect = new Rect(_xposLoad, _yposLoad, _xsizeLoad, _ysizeLoad);
 
-            KK_Archetypes.LoadHairstyleHotkey =    new SavedKeyboardShortcut("GetHairstyleHotkey", KK_Archetypes.PluginNameInternal, new KeyboardShortcut(KeyCode.Z, CtrlShift));
-            KK_Archetypes.LoadHaircolorHotkey =    new SavedKeyboardShortcut("GetHaircolorHotkey", KK_Archetypes.PluginNameInternal, new KeyboardShortcut(KeyCode.X, CtrlShift));
-            KK_Archetypes.LoadEyebrowHotkey =      new SavedKeyboardShortcut("GetEyebrowHotkey",   KK_Archetypes.PluginNameInternal, new KeyboardShortcut(KeyCode.C, CtrlShift));
-            KK_Archetypes.LoadEyelineHotkey =      new SavedKeyboardShortcut("GetEyelineHotkey",   KK_Archetypes.PluginNameInternal, new KeyboardShortcut(KeyCode.V, CtrlShift));
-            KK_Archetypes.LoadEyecolorHotkey =     new SavedKeyboardShortcut("GetEyecolorHotkey",  KK_Archetypes.PluginNameInternal, new KeyboardShortcut(KeyCode.B, CtrlShift));
-            KK_Archetypes.LoadFaceHotkey =         new SavedKeyboardShortcut("GetFaceHotkey",      KK_Archetypes.PluginNameInternal, new KeyboardShortcut(KeyCode.N, CtrlShift));
-            KK_Archetypes.LoadSkinHotkey =         new SavedKeyboardShortcut("GetSkinHotkey",      KK_Archetypes.PluginNameInternal, new KeyboardShortcut(KeyCode.M, CtrlShift));
-            KK_Archetypes.LoadBodyHotkey =         new SavedKeyboardShortcut("GetBodyHotkey",      KK_Archetypes.PluginNameInternal, new KeyboardShortcut(KeyCode.Comma, CtrlShift));
-            KK_Archetypes.LoadAllHotkey =          new SavedKeyboardShortcut("GetAllHotkey",       KK_Archetypes.PluginNameInternal, new KeyboardShortcut(KeyCode.E, CtrlShift));
+            _selectStyle.normal.background = new Texture2D(1,1);
+            _selectStyle.normal.background.SetPixel(1, 1, new Color(1, 1, 1, .4f));
+            _selectStyle.normal.background.Apply();
+            _selectStyle.active.background = _selectStyle.normal.background;
+            _selectStyle.focused.background = _selectStyle.normal.background;
+            _selectStyle.hover.background = _selectStyle.normal.background;
+
+            _normalStyle.normal.textColor = Color.white;
+            _normalStyle.active.textColor = Color.white;
+            _normalStyle.hover.textColor = Color.white;
+            _normalStyle.focused.textColor = Color.white;
+
+            FavoritesSubCat = new MakerCategory(MakerConstants.Parameter.Character.CategoryName, "Archetypes");
         }
 
+        /// <summary>
+        /// Update function, called by main class for hotkey purposes.
+        /// </summary>
         internal void Update()
         {
-            if (KK_Archetypes.AddHairstyleHotkey.IsDown()) Hair.AddArchetypeHairStyleFromSelected();
-            if (KK_Archetypes.AddHaircolorHotkey.IsDown()) Hair.AddArchetypeHairColorFromSelected();
-            if (KK_Archetypes.AddEyelineHotkey.IsDown()) Eyes.AddArchetypeEyelineFromSelected();
-            if (KK_Archetypes.AddEyecolorHotkey.IsDown()) Eyes.AddArchetypeEyeColorFromSelected();
-            if (KK_Archetypes.AddEyebrowHotkey.IsDown()) Face.AddArchetypeEyebrowFromSelected();
-            if (KK_Archetypes.AddFaceHotkey.IsDown()) Face.AddArchetypeFaceFromSelected();
-            if (KK_Archetypes.AddSkinHotkey.IsDown()) Body.AddArchetypeSkinFromSelected();
-            if (KK_Archetypes.AddBodyHotkey.IsDown()) Body.AddArchetypeBodyFromSelected();
-
-            if (KK_Archetypes.LoadHairstyleHotkey.IsDown()) Hair.LoadRandomArchetypeHairStyle();
-            if (KK_Archetypes.LoadHaircolorHotkey.IsDown()) Hair.LoadRandomArchetypeHairColor();
-            if (KK_Archetypes.LoadEyelineHotkey.IsDown()) Eyes.LoadRandomArchetypeEyeline();
-            if (KK_Archetypes.LoadEyecolorHotkey.IsDown()) Eyes.LoadRandomArchetypeEyeColor();
-            if (KK_Archetypes.LoadEyebrowHotkey.IsDown()) Face.LoadRandomArchetypeEyebrow();
-            if (KK_Archetypes.LoadFaceHotkey.IsDown()) Face.LoadRandomArchetypeFace();
-            if (KK_Archetypes.LoadSkinHotkey.IsDown()) Body.LoadRandomArchetypeSkin();
-            if (KK_Archetypes.LoadBodyHotkey.IsDown()) Body.LoadRandomArchetypeBody();
-
-            if (KK_Archetypes.AddAllHeadHotkey.IsDown()) KK_Archetypes.AddAllArchetypesHead(true);
-            if (KK_Archetypes.AddAllBodyHotkey.IsDown()) KK_Archetypes.AddAllArchetypesBody(true);
-            if (KK_Archetypes.LoadAllHotkey.IsDown()) KK_Archetypes.LoadAllArchetypes();
+            if (KK_Archetypes.AddAllHotkey.IsDown())
+            {
+                if (MakerAPI.InsideAndLoaded)
+                    AddSelected(true);
+            }
+            if (KK_Archetypes.LoadAllHotkey.IsDown())
+            {
+                LoadSelected(true);
+                Utilities.FinalizeLoad();
+            }
         }
 
+        /// <summary>
+        /// Initializer for Favorites subcategory under preferences in Maker Menu.
+        /// </summary>
+        /// <param sender>Sender object to event handler</param>
+        /// <param e>Event handler for subcategories</param>
         public void Archetype_Maker_UI_Menu(object sender, RegisterSubCategoriesEvent e)
         {
-            KK_Archetypes KKAT_instance = Singleton<KK_Archetypes>.Instance;
-            // Face Menu
-            e.AddControl(new MakerText("Add Favorites To List", MakerConstants.Face.All, KKAT_instance));
-            e.AddControl(new MakerButton("Add Hair Style", MakerConstants.Face.All, KKAT_instance)).OnClick.AddListener(delegate { Hair.AddArchetypeHairStyle(); });
-            e.AddControl(new MakerButton("Add Hair Color", MakerConstants.Face.All, KKAT_instance)).OnClick.AddListener(delegate { Hair.AddArchetypeHairColor(); });
-            e.AddControl(new MakerButton("Add Eye Color", MakerConstants.Face.All, KKAT_instance)).OnClick.AddListener(delegate { Eyes.AddArchetypeEyeColor(); });
-            e.AddControl(new MakerButton("Add Eyeline", MakerConstants.Face.All, KKAT_instance)).OnClick.AddListener(delegate { Eyes.AddArchetypeEyeline(); });
-            e.AddControl(new MakerButton("Add Eyebrow", MakerConstants.Face.All, KKAT_instance)).OnClick.AddListener(delegate { Face.AddArchetypeEyebrow(); });
-            e.AddControl(new MakerButton("Add Face", MakerConstants.Face.All, KKAT_instance)).OnClick.AddListener(delegate { Face.AddArchetypeFace(); });
+            // Register subcategory
+            e.AddSubCategory(FavoritesSubCat);
 
-            e.AddControl(new MakerText("Randomize Favorite Styles", MakerConstants.Face.All, KKAT_instance));
-            e.AddControl(new MakerButton("Get Hair Style", MakerConstants.Face.All, KKAT_instance)).OnClick.AddListener(delegate { Hair.LoadRandomArchetypeHairStyle(); });
-            e.AddControl(new MakerButton("Get Hair Color", MakerConstants.Face.All, KKAT_instance)).OnClick.AddListener(delegate { Hair.LoadRandomArchetypeHairColor(); });
-            e.AddControl(new MakerButton("Get Eye Color", MakerConstants.Face.All, KKAT_instance)).OnClick.AddListener(delegate { Eyes.LoadRandomArchetypeEyeColor(); });
-            e.AddControl(new MakerButton("Get Eyeline", MakerConstants.Face.All, KKAT_instance)).OnClick.AddListener(delegate { Eyes.LoadRandomArchetypeEyeline(); });
-            e.AddControl(new MakerButton("Get Eyebrow", MakerConstants.Face.All, KKAT_instance)).OnClick.AddListener(delegate { Face.LoadRandomArchetypeEyebrow(); });
-            e.AddControl(new MakerButton("Get Face", MakerConstants.Face.All, KKAT_instance)).OnClick.AddListener(delegate { Face.LoadRandomArchetypeFace(); });
+            // Make controls for custom subcategory
+            Hair._toggleHairstyle = new MakerToggle(FavoritesSubCat, "Haircolor", KKAT_instance);
+            Hair._toggleHaircolor = new MakerToggle(FavoritesSubCat, "Hairstyle", KKAT_instance);
+            e.AddControl(Hair._toggleHairstyle);
+            e.AddControl(Hair._toggleHaircolor);
 
-            // Body Menu
-            e.AddControl(new MakerText("Add Favorites To List", MakerConstants.Body.All, KKAT_instance));
-            e.AddControl(new MakerButton("Add Skin", MakerConstants.Body.All, KKAT_instance)).OnClick.AddListener(delegate { Body.AddArchetypeSkin(); });
-            e.AddControl(new MakerButton("Add Body", MakerConstants.Body.All, KKAT_instance)).OnClick.AddListener(delegate { Body.AddArchetypeBody(); });
+            e.AddControl(new MakerSeparator(FavoritesSubCat, KKAT_instance));
 
-            e.AddControl(new MakerText("Randomize Favorite Styles", MakerConstants.Body.All, KKAT_instance));
-            e.AddControl(new MakerButton("Get Skin", MakerConstants.Body.All, KKAT_instance)).OnClick.AddListener(delegate { Body.LoadRandomArchetypeSkin(); });
-            e.AddControl(new MakerButton("Get Body", MakerConstants.Body.All, KKAT_instance)).OnClick.AddListener(delegate { Body.LoadRandomArchetypeBody(); });
+            Face._toggleEyecolor = new MakerToggle(FavoritesSubCat, "Eyecolor", KKAT_instance);
+            Face._toggleEyeline = new MakerToggle(FavoritesSubCat, "Eyeline", KKAT_instance);
+            Face._toggleEyebrow = new MakerToggle(FavoritesSubCat, "Eyebrow", KKAT_instance);
+            Face._toggleFace = new MakerToggle(FavoritesSubCat, "Face", KKAT_instance);
+            e.AddControl(Face._toggleEyecolor);
+            e.AddControl(Face._toggleEyeline);
+            e.AddControl(Face._toggleEyebrow);
+            e.AddControl(Face._toggleFace);
 
-            // Parameter Menu
-            e.AddControl(new MakerText("Archetype Control", MakerConstants.Parameter.Character, KKAT_instance));
-            e.AddControl(new MakerButton("Add Head To All", MakerConstants.Parameter.Character, KKAT_instance)).OnClick.AddListener(delegate { KK_Archetypes.AddAllArchetypesHead(); });
-            e.AddControl(new MakerButton("Add Body To All", MakerConstants.Parameter.Character, KKAT_instance)).OnClick.AddListener(delegate { KK_Archetypes.AddAllArchetypesBody(); });
-            e.AddControl(new MakerButton("Randomize All", MakerConstants.Parameter.Character, KKAT_instance)).OnClick.AddListener(delegate { KK_Archetypes.LoadAllArchetypes(); });
+            e.AddControl(new MakerSeparator(FavoritesSubCat, KKAT_instance));
 
-            e.AddControl(new MakerText("Save/Reset Favorites", MakerConstants.Parameter.Character, KKAT_instance));
-            e.AddControl(new MakerButton("Save List", MakerConstants.Parameter.Character, KKAT_instance)).OnClick.AddListener(delegate { KK_Archetypes.Data.SaveToFile(); });
-            e.AddControl(new MakerButton("Reset List", MakerConstants.Parameter.Character, KKAT_instance)).OnClick.AddListener(delegate { KK_Archetypes.ClearData(); });
-            e.AddControl(new MakerButton("Reload List", MakerConstants.Parameter.Character, KKAT_instance)).OnClick.AddListener(delegate { KK_Archetypes.ReloadData(); });
+            Body._toggleSkin = new MakerToggle(FavoritesSubCat, "Skin", KKAT_instance);
+            Body._toggleBody = new MakerToggle(FavoritesSubCat, "Body", KKAT_instance);
+            e.AddControl(Body._toggleSkin);
+            e.AddControl(Body._toggleBody);
+
+            e.AddControl(new MakerSeparator(FavoritesSubCat, KKAT_instance));
+
+            Clothes._toggleClothes = new MakerToggle(FavoritesSubCat, "Clothes", KKAT_instance);
+            e.AddControl(Clothes._toggleClothes);
+
+            e.AddControl(new MakerSeparator(FavoritesSubCat, KKAT_instance));
+
+            e.AddControl(new MakerButton("Add Selection To Favorites", FavoritesSubCat, KKAT_instance)).OnClick.AddListener(delegate { AddSelected(); });
+            e.AddControl(new MakerButton("Get Random From Favorites", FavoritesSubCat, KKAT_instance)).OnClick.AddListener(delegate { LoadSelected(); });
+            e.AddControl(new MakerToggle(FavoritesSubCat, "Show Advanced Favorite Controls", KKAT_instance)).ValueChanged.Subscribe(b => showAvancedGUI = b);
+        }
+
+        /// <summary>
+        /// Method to add data to favorite list.
+        /// NOTE: This could possibly be moved to the main plugin class
+        /// </summary>
+        /// <param fromSelected>Flag for adding from CustomFileList or from current character</param>
+        private static void AddSelected(bool fromSelected = false)
+        {
+            if (!KK_Archetypes._loadCosToggle.isOn) // Do not add character data if in Coordinate Load menu
+            {
+                ChaFileControl file = fromSelected ? Utilities.GetSelectedCharacter() : MakerAPI.GetCharacterControl().chaFile;
+                if (file != null)
+                {
+                    Hair.AddHairStyle(file);
+                    Hair.AddHairColor(file);
+                    Face.AddEyeColor(file);
+                    Face.AddEyeline(file);
+                    Face.AddEyebrow(file);
+                    Face.AddFace(file, fromSelected);
+                    Body.AddSkin(file);
+                    Body.AddBody(file, fromSelected);
+                }
+            }
+            ChaFileCoordinate clothes;
+            string key; // Create key in case user is adding coordinate from character instead of coordinate file
+            if (fromSelected)
+            {
+                if (KK_Archetypes._loadCosToggle.isOn)
+                {
+                    clothes = Utilities.GetSelectedCoordinate();
+                    key = null;
+                }
+                else
+                {
+                    clothes = Utilities.GetSelectedCharacter().coordinate[Clothes._coordinateToggle];
+                    key = Utilities.CreateNewKey(Utilities.GetSelectedCharacter());
+                }
+            }
+            else
+            {
+                clothes = MakerAPI.GetCharacterControl().nowCoordinate;
+                key = Utilities.CreateNewKey(Utilities.GetSelectedCharacter());
+            }
+            if (clothes != null)
+            {
+                Clothes.AddClothes(clothes, key);
+            }
+            if (KK_Archetypes.IncrementFlag) Utilities.IncrementSelectIndex();
+            Utilities.PlaySound();
+        }
+
+        /// <summary>
+        /// Method to load (random) data from favorite list.
+        /// NOTE: This could possibly be moved to the main plugin class
+        /// </summary>
+        /// <param combine>Flag for checking if data is loaded in combination</param>
+        private static void LoadSelected(bool combine = false)
+        {
+            Hair.LoadHairStyle();
+            Hair.LoadHairColor();
+            Face.LoadEyeColor();
+            Face.LoadEyeline();
+            Face.LoadEyebrow();
+            Face.LoadFace();
+            Body.LoadSkin();
+            Body.LoadBody();
+            Clothes.LoadClothes();
+            if (!combine) Utilities.FinalizeLoad();
+        }
+
+        /// <summary>
+        /// Method to draw buttons for advanced control menu.
+        /// </summary>
+        public static void DrawAdvCtrButtons()
+        {
+            GUILayout.BeginHorizontal();
+            {
+                if (GUILayout.Button("Save")) KK_Archetypes.Data.SaveToFile();
+                if (GUILayout.Button("Clear")) KK_Archetypes.ClearData();
+                if (GUILayout.Button("Reload")) KK_Archetypes.ReloadData();
+            }
+            GUILayout.EndHorizontal();
+        }
+
+        /// <summary>
+        /// Method to draw toggles for advanced control menu.
+        /// </summary>
+        public static void DrawTogglesAdv()
+        {
+            GUILayout.BeginVertical(GUI.skin.box);
+            {
+                GUILayout.BeginHorizontal();
+                {
+                    _currCategory = GUILayout.Toggle(_currCategory == KKATData.Category.Hairstyle, "Hairstyle") ? KKATData.Category.Hairstyle : _currCategory;
+                    _currCategory = GUILayout.Toggle(_currCategory == KKATData.Category.Haircolor, "Haircolor") ? KKATData.Category.Haircolor : _currCategory;
+                    _currCategory = GUILayout.Toggle(_currCategory == KKATData.Category.Eyeline, "Eyeline") ? KKATData.Category.Eyeline : _currCategory;
+                    _currCategory = GUILayout.Toggle(_currCategory == KKATData.Category.Eyecolor, "Eyecolor") ? KKATData.Category.Eyecolor : _currCategory;
+                }
+                GUILayout.EndHorizontal();
+
+                GUILayout.BeginHorizontal();
+                {
+                    _currCategory = GUILayout.Toggle(_currCategory == KKATData.Category.Eyebrow, "Eyebrow") ? KKATData.Category.Eyebrow : _currCategory;
+                    _currCategory = GUILayout.Toggle(_currCategory == KKATData.Category.Face, "Face") ? KKATData.Category.Face : _currCategory;
+                    _currCategory = GUILayout.Toggle(_currCategory == KKATData.Category.Skin, "Skin") ? KKATData.Category.Skin : _currCategory;
+                    _currCategory = GUILayout.Toggle(_currCategory == KKATData.Category.Body, "Body") ? KKATData.Category.Body : _currCategory;
+                }
+                GUILayout.EndHorizontal();
+                GUILayout.BeginHorizontal();
+                {
+                    _currCategory = GUILayout.Toggle(_currCategory == KKATData.Category.Clothes, "Clothes") ? KKATData.Category.Clothes : _currCategory;
+                }
+                GUILayout.EndHorizontal();
+
+            }
+            GUILayout.EndVertical();
+        }
+
+        /// <summary>
+        /// Method to draw toggles for advanced control menu.
+        /// </summary>
+        public static void DrawScrollList()
+        {
+            DrawAdvCtrButtons();
+            _scrollPos = GUILayout.BeginScrollView(_scrollPos, GUIStyle.none, GUI.skin.verticalScrollbar, GUILayout.MaxWidth(_xsizeAdv - 8), GUILayout.MaxHeight(_ysizeAdv - 148));
+            GUILayout.BeginVertical(GUI.skin.box, GUILayout.MinHeight(_ysizeAdv - 188));
+            {
+                foreach (string key in KK_Archetypes.Data.GetKeys(_currCategory))
+                {
+                    string showKey = key.Remove(key.IndexOf("->"), key.Length - key.IndexOf("->"));
+                    if (_selected != key)
+                    {
+                        if (GUILayout.Button(showKey, _normalStyle))
+                        {
+                            _selected = key;
+                            _renameEntry = showKey;
+                        }
+                    }
+                    else
+                    {
+                        if (GUILayout.Button(showKey, _selectStyle))
+                        {
+                            _selected = key;
+                            _renameEntry = showKey;
+                        }
+                    }
+                }
+                if (KK_Archetypes.Data.GetKeys(_currCategory).Count == 0) GUILayout.Label("");
+            }
+            GUILayout.EndVertical();
+            GUILayout.EndScrollView();
+        }
+
+        /// <summary>
+        /// Method to draw toggles for quick control menu.
+        /// </summary>
+        public static void DrawTogglesQuick()
+        {
+            GUI.enabled = KK_Archetypes._loadCharaToggle.isOn; // Check if currently in chara load screen and disable inactive toggles
+            GUILayout.BeginHorizontal();
+            {
+                Hair._toggleHairstyle.Value = GUILayout.Toggle(Hair._toggleHairstyle.Value, "Hairstyle");
+                Hair._toggleHaircolor.Value = GUILayout.Toggle(Hair._toggleHaircolor.Value, "Haircolor");
+            }
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            {
+                Face._toggleEyecolor.Value = GUILayout.Toggle(Face._toggleEyecolor.Value, "Eyeline");
+                Face._toggleEyeline.Value = GUILayout.Toggle(Face._toggleEyeline.Value, "Eyecolor");
+            }
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            {
+                Face._toggleEyebrow.Value = GUILayout.Toggle(Face._toggleEyebrow.Value, "Brow");
+                Face._toggleFace.Value = GUILayout.Toggle(Face._toggleFace.Value, "Face");
+            }
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            {
+                Body._toggleSkin.Value = GUILayout.Toggle(Body._toggleSkin.Value, "Skin");
+                Body._toggleBody.Value = GUILayout.Toggle(Body._toggleBody.Value, "Body");
+            }
+            GUILayout.EndHorizontal();
+
+            GUI.enabled = true; // Reset active GUI
+
+            GUILayout.BeginHorizontal();
+            {
+                Clothes._toggleClothes.Value = GUILayout.Toggle(Clothes._toggleClothes.Value, "Clothes");
+            }
+            GUILayout.EndHorizontal();
+
+            GUI.enabled = KK_Archetypes._loadCharaToggle.isOn; // Disable GUI for choosing coordinate if in Coordinate load menu
+
+            GUILayout.Label("Load Outfit No:");
+
+            GUILayout.BeginHorizontal();
+            {
+                Clothes._coordinateToggle = GUILayout.Toggle(Clothes._coordinateToggle == 0, "1") ? 0 : Clothes._coordinateToggle;
+                Clothes._coordinateToggle = GUILayout.Toggle(Clothes._coordinateToggle == 1, "2") ? 1 : Clothes._coordinateToggle;
+                Clothes._coordinateToggle = GUILayout.Toggle(Clothes._coordinateToggle == 2, "3") ? 2 : Clothes._coordinateToggle;
+                Clothes._coordinateToggle = GUILayout.Toggle(Clothes._coordinateToggle == 3, "4") ? 3 : Clothes._coordinateToggle;
+                Clothes._coordinateToggle = GUILayout.Toggle(Clothes._coordinateToggle == 4, "5") ? 4 : Clothes._coordinateToggle;
+                Clothes._coordinateToggle = GUILayout.Toggle(Clothes._coordinateToggle == 5, "6") ? 5 : Clothes._coordinateToggle;
+                Clothes._coordinateToggle = GUILayout.Toggle(Clothes._coordinateToggle == 6, "7") ? 6 : Clothes._coordinateToggle;
+            }
+            GUILayout.EndHorizontal();
+            GUI.enabled = true;
+        }
+
+        /// <summary>
+        /// Method to draw advanced control menu.
+        /// </summary>
+        /// <param id>Unity window ID</param>
+        public static void AdvancedControls(int id)
+        {
+
+            GUILayout.BeginVertical(GUILayout.Width(_xsizeAdv-8));
+            {
+                DrawScrollList();
+                DrawTogglesAdv();
+                GUILayout.BeginHorizontal();
+                {
+                    if (GUILayout.Button("Load Part")) KK_Archetypes.Data.LoadEntry(_currCategory, _selected);
+                    if (GUILayout.Button("Delete")) KK_Archetypes.Data.DeleteEntry(_currCategory, _selected);
+                }
+                GUILayout.EndHorizontal();
+                GUILayout.BeginHorizontal();
+                {
+                    _renameEntry = GUILayout.TextField(_renameEntry, GUILayout.Width((_xsizeAdv-8) * 0.6f));
+                    if (GUILayout.Button("Rename"))
+                    {
+                        KK_Archetypes.Data.RenameEntry(_currCategory, _selected, _renameEntry);
+                        _selected = _renameEntry + _selected.Substring(_selected.IndexOf("->"));
+                    }
+                }
+                GUILayout.EndHorizontal();
+            }
+            GUILayout.EndVertical();
+        }
+
+        /// <summary>
+        /// Method to draw quick control menu.
+        /// </summary>
+        /// <param id>Unity window ID</param>
+        public static void QuickControls(int id)
+        {
+            DrawTogglesQuick();
+            if (GUILayout.Button("Add from Selected")) AddSelected(true);
+            KK_Archetypes.IncrementFlag = GUILayout.Toggle(KK_Archetypes.IncrementFlag, "Jump to next");
         }
     }
 }

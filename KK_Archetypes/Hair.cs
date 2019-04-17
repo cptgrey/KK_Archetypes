@@ -1,9 +1,22 @@
 ﻿using KKAPI.Maker;
+using KKAPI.Maker.UI;
 
 namespace KK_Archetypes
 {
     class Hair
     {
+        // Current class toggles for Maker menu.
+        internal static MakerToggle _toggleHairstyle { get; set; }
+        internal static MakerToggle _toggleHaircolor { get; set; }
+
+        /// <summary>
+        /// Method to check if any current class toggles are selected.
+        /// </summary>
+        internal static bool AnyToggles()
+        {
+            return _toggleHairstyle.Value || _toggleHaircolor.Value;
+        }
+
         /// <summary>
         /// Method to copy data to/from characters.
         /// </summary>
@@ -40,95 +53,59 @@ namespace KK_Archetypes
         /// Method to add data to KKATData.
         /// </summary>
         /// <param curr>Current file to copy from</param>
-        internal static void AddHairStyle(ChaFileHair curr)
+        internal static void AddHairStyle(ChaFileControl curr)
         {
+            if (!_toggleHairstyle.Value) return;
             ChaFileHair add = new ChaFileHair();
-            HairStyleWriter(curr, add);
-            KK_Archetypes.Data.Hairstyle.Add(add);
-        }
-
-        /// <summary>
-        /// Method to add data directly from selected card in CharaMaker.
-        /// </summary>
-        internal static void AddArchetypeHairStyleFromSelected()
-        {
-            if (!MakerAPI.InsideAndLoaded) return;
-            ChaFileHair curr = Utilities.GetSelectedCharacter().custom.hair;
-            AddHairStyle(curr);
-            Utilities.IncrementSelectIndex();
-            Utilities.PlaySound();
-        }
-
-        /// <summary>
-        /// Method to add data from current character.
-        /// </summary>
-        internal static void AddArchetypeHairStyle()
-        {
-            ChaFileHair curr = MakerAPI.GetCharacterControl().chaFile.custom.hair;
-            AddHairStyle(curr);
-            Utilities.PlaySound();
+            HairStyleWriter(curr.custom.hair, add);
+            string key = Utilities.CreateNewKey(curr);
+            KK_Archetypes.Data.HairstyleDict.Add(key, add);
         }
 
         /// <summary>
         /// Method to add data to KKATData.
         /// </summary>
         /// <param curr>Current file to copy from</param>
-        internal static void AddHairColor(ChaFileHair curr)
+        internal static void AddHairColor(ChaFileControl curr)
         {
+            if (!_toggleHaircolor.Value) return;
             ChaFileHair add = new ChaFileHair();
-            HairColorWriter(curr, add);
-            KK_Archetypes.Data.Haircolor.Add(add);
+            HairColorWriter(curr.custom.hair, add);
+            string key = Utilities.CreateNewKey(curr);
+            KK_Archetypes.Data.HaircolorDict.Add(key, add);
         }
 
         /// <summary>
-        /// Method to add data directly from selected card in CharaMaker.
+        /// Method to load data from KKATData.
         /// </summary>
-        internal static void AddArchetypeHairColorFromSelected()
+        /// <param key>Key to load</param>
+        internal static void LoadHairStyle(string key = null)
         {
-            if (!MakerAPI.InsideAndLoaded) return;
-            ChaFileHair curr = Utilities.GetSelectedCharacter().custom.hair;
-            AddHairColor(curr);
-            Utilities.IncrementSelectIndex();
-            Utilities.PlaySound();
-        }
-
-        /// <summary>
-        /// Method to add data from current character.
-        /// </summary>
-        internal static void AddArchetypeHairColor()
-        {
-            ChaFileHair curr = MakerAPI.GetCharacterControl().chaFile.custom.hair;
-            AddHairColor(curr);
-            Utilities.PlaySound();
-        }
-
-        /// <summary>
-        /// Method to load hairstyle data from KKATData.
-        /// </summary>
-        internal static void LoadRandomArchetypeHairStyle()
-        {
-            if (!MakerAPI.InsideAndLoaded) return;
-            if (KK_Archetypes.Data.Hairstyle.Count == 0) return;
-            ChaFileHair add = KK_Archetypes.Data.Hairstyle[Utilities.Rand.Next(KK_Archetypes.Data.Hairstyle.Count)];
+            if (!_toggleHairstyle.Value) return;
+            if (KK_Archetypes.Data.HairstyleDict.Count == 0) return;
+            ChaFileHair add;
+            if (key == null) add = Utilities.GetRandomValue(KK_Archetypes.Data.HairstyleDict);
+            else add = KK_Archetypes.Data.HairstyleDict[key];
             ChaFileHair curr = MakerAPI.GetCharacterControl().chaFile.custom.hair;
             HairStyleWriter(add, curr);
-            Utilities.FinalizeLoad();
         }
 
         /// <summary>
-        /// Method to load hair color data from KKATData.
+        /// Method to load data from KKATData.
         /// </summary>
-        internal static void LoadRandomArchetypeHairColor()
+        /// <param key>Key to load</param>
+        internal static void LoadHairColor(string key = null)
         {
-            if (!MakerAPI.InsideAndLoaded) return;
-            if (KK_Archetypes.Data.Haircolor.Count == 0) return;
-            ChaFileHair add = KK_Archetypes.Data.Haircolor[Utilities.Rand.Next(KK_Archetypes.Data.Haircolor.Count)];
+            if (!_toggleHaircolor.Value) return;
+            if (KK_Archetypes.Data.HaircolorDict.Count == 0) return;
+            ChaFileHair add;
+            if (key == null) add = Utilities.GetRandomValue(KK_Archetypes.Data.HaircolorDict);
+            else add = KK_Archetypes.Data.HaircolorDict[key];
             ChaFile file = MakerAPI.GetCharacterControl().chaFile;
             ChaFileHair curr = file.custom.hair;
             HairColorWriter(add, curr);
             file.custom.face.eyebrowColor = Utilities.GetSlightlyDarkerColor(curr.parts[0].baseColor);
             file.custom.body.underhairColor = file.custom.face.eyebrowColor;
-            Utilities.FinalizeLoad();
         }
     }
 }

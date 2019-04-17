@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+using Harmony;
 using ExtensibleSaveFormat;
 using KKABMX.Core;
 using MessagePack;
-using System.Collections.Generic;
 using UnityEngine;
 using Illusion.Game;
 using KKAPI.Maker;
@@ -13,6 +15,7 @@ namespace KK_Archetypes
 {
     static class Utilities
     {
+        // RNG
         internal static readonly System.Random Rand = new System.Random();
 
         /// <summary>
@@ -20,11 +23,60 @@ namespace KK_Archetypes
         /// </summary>
         internal static void FinalizeLoad()
         {
-            if (!KK_Archetypes.AllFlag)
+            MakerAPI.GetCharacterControl().Reload();
+            PlaySound();
+        }
+
+        /// <summary>
+        /// Method to shuffle a generic list.
+        /// NOTE: Currently unused. Could be used in later implementations.
+        /// </summary>
+        /// <param list>List to shuffle</param>
+        public static void ShuffleList<T>(List<T> list)
+        {
+            int n = list.Count;
+            while (n > 1)
             {
-                MakerAPI.GetCharacterControl().Reload();
-                PlaySound();
+                n--;
+                int k = Utilities.Rand.Next(n + 1);
+                T value = list[k];
+                list[k] = list[n];
+                list[n] = value;
             }
+        }
+
+        /// <summary>
+        /// Method to get a random key from a string dictionary.
+        /// </summary>
+        internal static string GetRandomKey<T>(Dictionary<string, T> dict)
+        {
+            return dict.Keys.ElementAt(Rand.Next(dict.Count));
+        }
+
+        /// <summary>
+        /// Method to get a random value from a string dictionary.
+        /// </summary>
+        internal static T GetRandomValue<T>(Dictionary<string, T> dict)
+        {
+            return dict[GetRandomKey<T>(dict)];
+        }
+
+        /// <summary>
+        /// Method to create a new key for a data dict.
+        /// </summary>
+        /// <param curr>ChaFileControl to generate key from</param>
+        internal static string CreateNewKey(ChaFileControl curr)
+        {
+            return String.Format("{1}{2}->{0}", DateTime.Now.ToLocalTime().ToString("yyMMddhhmmssfff"), curr.parameter.lastname, curr.parameter.firstname);
+        }
+
+        /// <summary>
+        /// Method to create a new key for a data dict.
+        /// </summary>
+        /// <param curr>ChaClothesControl to generate key from</param>
+        internal static string CreateNewKey(ChaFileCoordinate curr)
+        {
+            return String.Format("{1}{2}->{0}", DateTime.Now.ToLocalTime().ToString("yyMMddhhmmssfff"), curr.coordinateName, curr.coordinateFileName);
         }
 
         /// <summary>
@@ -44,9 +96,40 @@ namespace KK_Archetypes
         public static ChaFileControl GetSelectedCharacter()
         {
             ChaCustom.CustomFileInfoComponent selected = Singleton<ChaCustom.CustomFileListCtrl>.Instance.GetSelectTopItem();
-            ChaFileControl tmp = new ChaFileControl();
-            tmp.LoadCharaFile(selected.info.FullPath, byte.MaxValue);
-            return tmp;
+            if (selected != null)
+            {
+                ChaFileControl tmp = new ChaFileControl();
+                tmp.LoadCharaFile(selected.info.FullPath, byte.MaxValue);
+                return tmp;
+            }
+            else return null;
+        }
+
+        /// <summary>
+        /// Returns a ChaFileCoordinate instance from the selected coordinate in CharaMaker.
+        /// </summary>
+        public static ChaFileCoordinate GetSelectedCoordinate()
+        {
+            ChaCustom.CustomCoordinateFile clothesFile = Singleton<ChaCustom.CustomCoordinateFile>.Instance;
+            ChaCustom.CustomFileListCtrl listCtrl = Traverse.Create(clothesFile).Field("listCtrl").GetValue<ChaCustom.CustomFileListCtrl>();
+            ChaCustom.CustomFileInfoComponent selected = listCtrl.GetSelectTopItem();
+            if (selected != null)
+            {
+                string fullPath = selected.info.FullPath;
+                ChaFileCoordinate tmp = new ChaFileCoordinate();
+                tmp.LoadFile(fullPath);
+                return tmp;
+            }
+            else return null;
+        }
+
+        /// <summary>
+        /// Returns int index of currently selected coordinate from the character in CharaMaker.
+        /// </summary>
+        public static int GetCurrentlyAssignedCoordinateType()
+        {
+            ChaFileStatus chaFileStatus = MakerAPI.GetCharacterControl().fileStatus;
+            return chaFileStatus.coordinateType;
         }
 
         /// <summary>
@@ -58,16 +141,38 @@ namespace KK_Archetypes
         }
 
         /// <summary>
-        /// Used to increment the selected character in the maker. NOTE: This is quite buggy atm, need to have a look at this later. 
+        /// Used to increment the selected character / coordinate in the maker.
         /// </summary>
         public static void IncrementSelectIndex()
         {
-            ChaCustom.CustomFileListCtrl customFileList = Singleton<ChaCustom.CustomFileListCtrl>.Instance;
-            int nextindex = customFileList.GetSelectIndex()[0] + 1;
-            if (KK_Archetypes.IncrementFlag.Value)
+            if (KK_Archetypes.IncrementFlag)
             {
-                customFileList.ToggleAllOff();
-                if (nextindex < customFileList.GetInclusiveCount()) customFileList.SelectItem(nextindex);
+                // Increment character select index
+                if (KK_Archetypes._loadCharaToggle.isOn && (Body.AnyToggles() || Face.AnyToggles() || Hair.AnyToggles()))
+                {
+                    ChaCustom.CustomFileListCtrl listControl = Singleton<ChaCustom.CustomFileListCtrl>.Instance;
+                    List<ChaCustom.CustomFileInfo> fileInfos = Traverse.Create(listControl).Field("lstFileInfo").GetValue<List<ChaCustom.CustomFileInfo>>();
+                    if (fileInfos != null)
+                    {
+                        int nextindex = fileInfos.IndexOf(fileInfos.Find(x => x.index == listControl.GetSelectIndex()[0])) + 1;
+                        listControl.ToggleAllOff();
+                        if (nextindex < listControl.GetInclusiveCount()) listControl.SelectItem(fileInfos[nextindex].index);
+                    }
+                }
+
+                // Increment coordinate select index
+                if (KK_Archetypes._loadCosToggle.isOn && Clothes._toggleClothes.Value)
+                {
+                    ChaCustom.CustomCoordinateFile clothesFile = Singleton<ChaCustom.CustomCoordinateFile>.Instance;
+                    ChaCustom.CustomFileListCtrl listControl = Traverse.Create(clothesFile).Field("listCtrl").GetValue<ChaCustom.CustomFileListCtrl>();
+                    List<ChaCustom.CustomFileInfo> fileInfos = Traverse.Create(listControl).Field("lstFileInfo").GetValue<List<ChaCustom.CustomFileInfo>>();
+                    if (fileInfos != null)
+                    {
+                        int nextindex = fileInfos.IndexOf(fileInfos.Find(x => x.index == listControl.GetSelectIndex()[0])) + 1;
+                        listControl.ToggleAllOff();
+                        if (nextindex < listControl.GetInclusiveCount()) listControl.SelectItem(fileInfos[nextindex].index);
+                    }
+                }
             }
         }
 
@@ -101,6 +206,5 @@ namespace KK_Archetypes
             }
             return modifiers;
         }
-
     }
 }
