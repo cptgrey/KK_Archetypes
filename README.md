@@ -12,25 +12,30 @@ KK_Archetypes allows you to favorite different character parts and recombine the
 ## Features
 
 ### The Archetypes menu
-<img src= "https://raw.githubusercontent.com/cptgrey/KK_Archetypes/master/Assets/KKAT1.gif">
 
 The plugin adds a new subcategory to the Parameters menu (Heart Icon), where you can toggle which parts you want to save to your favorites or recombine to create a new character. There is also an advanced menu option for renaming your favorite parts, saving your favorites to disk for later use, and much more.
 
+<img src= "https://raw.githubusercontent.com/cptgrey/KK_Archetypes/master/Assets/KKAT1.gif">
+
 
 ### The Quick Controls menu
-<img src= "https://raw.githubusercontent.com/cptgrey/KK_Archetypes/master/Assets/KKAT2.gif">
+In the Load Character and Load Outfit menu screens, you will find a new menu to the right side where you can quickly add items to your favorite list from the selected cards. The "Jump to Next" option increments the selected card for you, making it easier to quickly add parts from cards to your favorites collection. Outfits, with accessories, can be added from either Character cards or Coordinate cards. Or you could always add items from your current character from the Archetype submenu instead.
 
-In the Load Character and Load Outfit menu screens, you will find a Quick Access menu to the right side where you can quickly add items to your favorite list from the selected cards. The "Jump to Next" option increments the selected card for you, making it easier to quickly add parts from cards to your favorites collection. Outfits, with accessories, can be added from either Character cards or Coordinate cards. Or you could always add items from your current character from the Archetype submenu instead.
+<img src= "https://raw.githubusercontent.com/cptgrey/KK_Archetypes/master/Assets/KKAT2.gif">
 
 
 ### Recombining new characters
-<img src= "https://raw.githubusercontent.com/cptgrey/KK_Archetypes/master/Assets/KKAT3.gif">
 
 When you have added enough parts to your favorite list, you can at any point recombine your favorite parts to a new character by going to the Archetype submenu, checking the parts you want to randomize, and clicking "Get Random From Favorite". If you want to add a specific part, you can find all the parts you have added to your list in the Advanced Controls menu.
 
-## Menu Overview / Guide
+<img src= "https://raw.githubusercontent.com/cptgrey/KK_Archetypes/master/Assets/KKAT3.gif">
+
+
+## Menu Overview 
+### Main Menu
 <img src= "https://raw.githubusercontent.com/cptgrey/KK_Archetypes/master/Assets/Menu_Overview.png">
 
+### Load Menu (Add to favorites)
 <img src= "https://raw.githubusercontent.com/cptgrey/KK_Archetypes/master/Assets/Quick_Overview.png">
 
 ## Saving / Reloading / Resetting Favorites
