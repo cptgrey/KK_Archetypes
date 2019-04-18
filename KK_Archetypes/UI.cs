@@ -2,6 +2,7 @@
 using KKAPI.Maker.UI;
 using UniRx;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace KK_Archetypes
 {
@@ -30,17 +31,23 @@ namespace KK_Archetypes
         // GUI Menu parameters
         internal static Vector2 _scrollPos;
         internal static Rect _advWindowRect;
-        internal static Rect _loadWindowRect;
+        internal static Rect _quickWindowRect;
 
         private static float _xsizeAdv = Screen.width * .237f;
-        private static float _ysizeAdv = Screen.height * .29f;
+        private static float _ysizeAdv = Screen.height * .32f;
         private static float _xposAdv = Screen.width * .078f;
-        private static float _yposAdv = Screen.height * .68f;
+        private static float _yposAdv = Screen.height * .66f;
 
-        private static float _xsizeLoad = Screen.width * .125f;
-        private static float _ysizeLoad = Screen.height * .2f;
-        private static float _xposLoad = Screen.width * .004f;
-        private static float _yposLoad = Screen.height * .33f;
+        private static float _xsizeQuick = Screen.width * .125f;
+        private static float _ysizeQuick = Screen.height * .17f;
+        private static float _xposQuick = Screen.width * .004f;
+        private static float _yposQuick = Screen.height * .28f;
+
+        private static float _quickToggleWidth = (_xsizeQuick - 18) / 2;
+
+        // Flag for selecting / deselecting all toggles
+        private static MakerToggle AllToggle;
+        private static string[] _currOutfit = { "School", "Going Home", "Gym", "Swimsuit", "Club", "Casual", "Sleepwear" };
 
         /// <summary>
         /// Initializer for Favorites UI.
@@ -51,7 +58,7 @@ namespace KK_Archetypes
             showAvancedGUI = false;
             showLoadGUI = true;
             _advWindowRect = new Rect(_xposAdv, _yposAdv, _xsizeAdv, _ysizeAdv);
-            _loadWindowRect = new Rect(_xposLoad, _yposLoad, _xsizeLoad, _ysizeLoad);
+            _quickWindowRect = new Rect(_xposQuick, _yposQuick, _xsizeQuick, _ysizeQuick);
 
             _selectStyle.normal.background = new Texture2D(1,1);
             _selectStyle.normal.background.SetPixel(1, 1, new Color(1, 1, 1, .4f));
@@ -66,6 +73,7 @@ namespace KK_Archetypes
             _normalStyle.focused.textColor = Color.white;
 
             FavoritesSubCat = new MakerCategory(MakerConstants.Parameter.Character.CategoryName, "Archetypes");
+            AllToggle = new MakerToggle(FavoritesSubCat, "Select/Deselect All", KKAT_instance);
         }
 
         /// <summary>
@@ -94,6 +102,9 @@ namespace KK_Archetypes
         {
             // Register subcategory
             e.AddSubCategory(FavoritesSubCat);
+
+            e.AddControl(new MakerText("Select parts to add/load from favorites and use the buttons to apply your choice.", FavoritesSubCat, KKAT_instance));
+            e.AddControl(new MakerSeparator(FavoritesSubCat, KKAT_instance));
 
             // Make controls for custom subcategory
             Hair._toggleHairstyle = new MakerToggle(FavoritesSubCat, "Haircolor", KKAT_instance);
@@ -126,8 +137,11 @@ namespace KK_Archetypes
 
             e.AddControl(new MakerSeparator(FavoritesSubCat, KKAT_instance));
 
+            e.AddControl(AllToggle).ValueChanged.Subscribe(b => ToggleAll(b));
+
             e.AddControl(new MakerButton("Add Selection To Favorites", FavoritesSubCat, KKAT_instance)).OnClick.AddListener(delegate { AddSelected(); });
             e.AddControl(new MakerButton("Get Random From Favorites", FavoritesSubCat, KKAT_instance)).OnClick.AddListener(delegate { LoadSelected(); });
+
             e.AddControl(new MakerToggle(FavoritesSubCat, "Show Advanced Favorite Controls", KKAT_instance)).ValueChanged.Subscribe(b => showAvancedGUI = b);
         }
 
@@ -138,6 +152,7 @@ namespace KK_Archetypes
         /// <param fromSelected>Flag for adding from CustomFileList or from current character</param>
         private static void AddSelected(bool fromSelected = false)
         {
+            bool change = false;
             if (!KK_Archetypes._loadCosToggle.isOn) // Do not add character data if in Coordinate Load menu
             {
                 ChaFileControl file = fromSelected ? Utilities.GetSelectedCharacter() : MakerAPI.GetCharacterControl().chaFile;
@@ -176,9 +191,9 @@ namespace KK_Archetypes
             if (clothes != null)
             {
                 Clothes.AddClothes(clothes, key);
+                if (KK_Archetypes.IncrementFlag) Utilities.IncrementSelectIndex();
+                Utilities.PlaySound();
             }
-            if (KK_Archetypes.IncrementFlag) Utilities.IncrementSelectIndex();
-            Utilities.PlaySound();
         }
 
         /// <summary>
@@ -288,59 +303,78 @@ namespace KK_Archetypes
         /// </summary>
         public static void DrawTogglesQuick()
         {
-            GUI.enabled = KK_Archetypes._loadCharaToggle.isOn; // Check if currently in chara load screen and disable inactive toggles
-            GUILayout.BeginHorizontal();
+            // Check if currently in chara load screen and disable inactive toggles
+            GUI.enabled = KK_Archetypes._loadCharaToggle.isOn;
             {
-                Hair._toggleHairstyle.Value = GUILayout.Toggle(Hair._toggleHairstyle.Value, "Hairstyle");
-                Hair._toggleHaircolor.Value = GUILayout.Toggle(Hair._toggleHaircolor.Value, "Haircolor");
-            }
-            GUILayout.EndHorizontal();
+                // Cooridnate select button
+                GUILayout.BeginHorizontal(GUI.skin.box);
+                {
+                    GUILayout.Label("Outfit:");
+                    if (GUILayout.Button(_currOutfit[Clothes._coordinateToggle])) Clothes._coordinateToggle = (Clothes._coordinateToggle + 1) % 7;
+                }
+                GUILayout.EndHorizontal();
 
-            GUILayout.BeginHorizontal();
-            {
-                Face._toggleEyecolor.Value = GUILayout.Toggle(Face._toggleEyecolor.Value, "Eyeline");
-                Face._toggleEyeline.Value = GUILayout.Toggle(Face._toggleEyeline.Value, "Eyecolor");
-            }
-            GUILayout.EndHorizontal();
+                // Hair toggles
+                GUILayout.BeginHorizontal();
+                {
+                    Hair._toggleHairstyle.Value = GUILayout.Toggle(Hair._toggleHairstyle.Value, "Hairstyle", GUILayout.Width(_quickToggleWidth));
+                    Hair._toggleHaircolor.Value = GUILayout.Toggle(Hair._toggleHaircolor.Value, "Haircolor");
+                }
+                GUILayout.EndHorizontal();
 
-            GUILayout.BeginHorizontal();
-            {
-                Face._toggleEyebrow.Value = GUILayout.Toggle(Face._toggleEyebrow.Value, "Brow");
-                Face._toggleFace.Value = GUILayout.Toggle(Face._toggleFace.Value, "Face");
-            }
-            GUILayout.EndHorizontal();
+                // Eye toggles
+                GUILayout.BeginHorizontal();
+                {
+                    Face._toggleEyecolor.Value = GUILayout.Toggle(Face._toggleEyecolor.Value, "Eyeline", GUILayout.Width(_quickToggleWidth));
+                    Face._toggleEyeline.Value = GUILayout.Toggle(Face._toggleEyeline.Value, "Eyecolor");
+                }
+                GUILayout.EndHorizontal();
 
-            GUILayout.BeginHorizontal();
-            {
-                Body._toggleSkin.Value = GUILayout.Toggle(Body._toggleSkin.Value, "Skin");
-                Body._toggleBody.Value = GUILayout.Toggle(Body._toggleBody.Value, "Body");
-            }
-            GUILayout.EndHorizontal();
+                // Face toggles
+                GUILayout.BeginHorizontal();
+                {
+                    Face._toggleEyebrow.Value = GUILayout.Toggle(Face._toggleEyebrow.Value, "Brow", GUILayout.Width(_quickToggleWidth));
+                    Face._toggleFace.Value = GUILayout.Toggle(Face._toggleFace.Value, "Face");
+                }
+                GUILayout.EndHorizontal();
 
+                // Body toggles
+                GUILayout.BeginHorizontal();
+                {
+                    Body._toggleSkin.Value = GUILayout.Toggle(Body._toggleSkin.Value, "Skin", GUILayout.Width(_quickToggleWidth));
+                    Body._toggleBody.Value = GUILayout.Toggle(Body._toggleBody.Value, "Body");
+                }
+                GUILayout.EndHorizontal();
+            }
             GUI.enabled = true; // Reset active GUI
 
+            // Clothes / Select All toggles
             GUILayout.BeginHorizontal();
             {
-                Clothes._toggleClothes.Value = GUILayout.Toggle(Clothes._toggleClothes.Value, "Clothes");
+                Clothes._toggleClothes.Value = GUILayout.Toggle(Clothes._toggleClothes.Value, "Clothes", GUILayout.Width(_quickToggleWidth));
+
+                GUI.enabled = KK_Archetypes._loadCharaToggle.isOn; // Disable GUI for select all when not in Character menu
+                {
+                    bool _allChanged = AllToggle.Value;
+                    AllToggle.Value = GUILayout.Toggle(AllToggle.Value, "Select All");
+                    if (_allChanged != AllToggle.Value) ToggleAll(AllToggle.Value);
+                }
+                GUI.enabled = true;
             }
             GUILayout.EndHorizontal();
+        }
 
-            GUI.enabled = KK_Archetypes._loadCharaToggle.isOn; // Disable GUI for choosing coordinate if in Coordinate load menu
-
-            GUILayout.Label("Load Outfit No:");
-
-            GUILayout.BeginHorizontal();
-            {
-                Clothes._coordinateToggle = GUILayout.Toggle(Clothes._coordinateToggle == 0, "1") ? 0 : Clothes._coordinateToggle;
-                Clothes._coordinateToggle = GUILayout.Toggle(Clothes._coordinateToggle == 1, "2") ? 1 : Clothes._coordinateToggle;
-                Clothes._coordinateToggle = GUILayout.Toggle(Clothes._coordinateToggle == 2, "3") ? 2 : Clothes._coordinateToggle;
-                Clothes._coordinateToggle = GUILayout.Toggle(Clothes._coordinateToggle == 3, "4") ? 3 : Clothes._coordinateToggle;
-                Clothes._coordinateToggle = GUILayout.Toggle(Clothes._coordinateToggle == 4, "5") ? 4 : Clothes._coordinateToggle;
-                Clothes._coordinateToggle = GUILayout.Toggle(Clothes._coordinateToggle == 5, "6") ? 5 : Clothes._coordinateToggle;
-                Clothes._coordinateToggle = GUILayout.Toggle(Clothes._coordinateToggle == 6, "7") ? 6 : Clothes._coordinateToggle;
-            }
-            GUILayout.EndHorizontal();
-            GUI.enabled = true;
+        private static void ToggleAll(bool val)
+        {
+            Hair._toggleHairstyle.Value = val;
+            Hair._toggleHaircolor.Value = val;
+            Face._toggleEyecolor.Value = val;
+            Face._toggleEyeline.Value = val;
+            Face._toggleEyebrow.Value = val;
+            Face._toggleFace.Value = val;
+            Body._toggleSkin.Value = val;
+            Body._toggleBody.Value = val;
+            Clothes._toggleClothes.Value = val;
         }
 
         /// <summary>

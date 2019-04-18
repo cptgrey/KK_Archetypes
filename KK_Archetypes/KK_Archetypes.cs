@@ -87,7 +87,7 @@ namespace KK_Archetypes
                 if (UI.showAvancedGUI && _parameterGroup.interactable)
                     UI._advWindowRect = GUILayout.Window(3156121, UI._advWindowRect, UI.AdvancedControls, "Advanced Favorite Controls");
                 if (UI.showLoadGUI && _systemGroup.interactable && (_loadCharaToggle.isOn || _loadCosToggle.isOn))
-                    UI._loadWindowRect = GUILayout.Window(3156122, UI._loadWindowRect, UI.QuickControls, "Favorites QuickControls");
+                    UI._quickWindowRect = GUILayout.Window(3156122, UI._quickWindowRect, UI.QuickControls, "Add to Favorites");
             }
         }
 

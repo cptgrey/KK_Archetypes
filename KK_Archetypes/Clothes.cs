@@ -38,7 +38,10 @@ namespace KK_Archetypes
             }
             addclothes = KK_Archetypes.Data.ClothesDict[key];
             addaccessory = KK_Archetypes.Data.AccessoryDict[key];
+            ChaFileCoordinate currCoordinate = MakerAPI.GetCharacterControl().chaFile.coordinate[Utilities.GetCurrentlyAssignedCoordinateType()];
+            currCoordinate.clothes = addclothes;
             MakerAPI.GetCharacterControl().nowCoordinate.clothes = addclothes;
+            currCoordinate.accessory = addaccessory;
             MakerAPI.GetCharacterControl().nowCoordinate.accessory = addaccessory;
         }
     }

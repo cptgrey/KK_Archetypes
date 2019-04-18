@@ -1,4 +1,4 @@
-![preview1](https://raw.githubusercontent.com/cptgrey/KK_Archetypes/master/Assets/KKAT_Preview.gif)
+![preview1](https://raw.githubusercontent.com/cptgrey/KK_Archetypes/master/Assets/KKAT_Preview_small.gif)
 
 # KK_Archetypes
 
@@ -9,7 +9,7 @@ KK_Archetypes allows you to favorite different character parts and recombine the
 - KKABMX v3.0.1
 
 
-## Features / Guide
+## Features
 
 ### The Archetypes menu
 <img src= "https://raw.githubusercontent.com/cptgrey/KK_Archetypes/master/Assets/KKAT1.gif">
@@ -28,7 +28,15 @@ In the Load Character and Load Outfit menu screens, you will find a Quick Access
 
 When you have added enough parts to your favorite list, you can at any point recombine your favorite parts to a new character by going to the Archetype submenu, checking the parts you want to randomize, and clicking "Get Random From Favorite". If you want to add a specific part, you can find all the parts you have added to your list in the Advanced Controls menu.
 
-## Parts
+## Menu Overview / Guide
+<img src= "https://raw.githubusercontent.com/cptgrey/KK_Archetypes/master/Assets/Menu_Overview.png">
+
+<img src= "https://raw.githubusercontent.com/cptgrey/KK_Archetypes/master/Assets/Quick_Overview.png">
+
+## Saving / Reloading / Resetting Favorites
+After creating a list of favorite parts, you can save your list for later with the advanced controls in the Archetypes menu. The list will be saved to `Koikatu/BepInEx/KKAT/KKAT_Data.xml` There are options for resetting / clearing the current list, and reloading the currently saved list in the Advanced Options menu.
+
+## Parts Overview
 ### Hair
 - Hair Style (Front, Back, Sides, Ahoge, Gloss)
 - Hair Colors (Root, Tip, Outline, Gloss)
@@ -44,14 +52,17 @@ When you have added enough parts to your favorite list, you can at any point rec
 ### Clothes
 - Clothes, Accessories
 
-## Saving / Reloading / Resetting Favorites
-After creating a list of favorite parts, you can save your list for later with the advanced controls in the Archetypes menu. There are also options for resetting / clearing the current list, and reloading the currently saved list.
-
-## Compatibility
-There are small issues with Kiyase, so disabling this is recommended.
+## Compatibility / Bugs
+- There are some issues with the Kiyase plugin and chest parameters, so disabling this is recommended.
+- Because of how skirt bones are loaded into the Maker, you might experience some issues with Skirt Scale parameters when recombining characters. This is a known bug, and will (hopefully) be improved on later releases. For now this can be remedied by saving and reloading your card.
 
 ## Planned additions:
 - Option for favoriting custom overlays (Skin, Clothes, Eyes, etc...)
+- Options for managing different favorite lists
+- Possibly move Load menu options into a custom System subcategory
+
+## Feedback
+Hit me up on the Koikatu discord if you have any suggestions / feedback on this mod. I apologize in advance for slow replies, as I'm quite busy with Uni for a while now, but I'll get back to you as soon as I can.
 
 ## Special thanks to:
 - [ManlyMarco](https://github.com/ManlyMarco)
