@@ -1,4 +1,4 @@
-![preview1](https://raw.githubusercontent.com/cptgrey/KK_Archetypes/master/Assets/KKAT_Preview_small.gif)
+![preview1](https://raw.githubusercontent.com/cptgrey/KK_Archetypes/master/Assets/KKAT_Preview_400.gif)
 
 # KK_Archetypes
 
