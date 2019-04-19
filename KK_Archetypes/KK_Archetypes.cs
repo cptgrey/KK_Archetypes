@@ -82,7 +82,7 @@ namespace KK_Archetypes
         /// </summary>
         void OnGUI()
         {
-            if (MakerAPI.InsideMaker)
+            if (MakerAPI.InsideMaker && Manager.Scene.Instance.NowSceneNames[0] == "CustomScene")
             {
                 if (UI.showAvancedGUI && _parameterGroup.interactable)
                     UI._advWindowRect = GUILayout.Window(3156121, UI._advWindowRect, UI.AdvancedControls, "Advanced Favorite Controls");
