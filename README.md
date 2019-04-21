@@ -74,4 +74,5 @@ Hit me up on the Koikatu discord if you have any suggestions / feedback on this 
 - [Anon11 (a.k.a. DeathWeasel1337)](https://github.com/DeathWeasel1337)
 - [bbepis](https://github.com/bbepis)
 - essu
+- ZMX for lots of great feedback and testing
 - The community in general :)

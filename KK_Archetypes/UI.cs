@@ -1,8 +1,8 @@
 ﻿using KKAPI.Maker;
 using KKAPI.Maker.UI;
+using KKAPI.Maker.UI.Sidebar;
 using UniRx;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace KK_Archetypes
 {
@@ -15,7 +15,7 @@ namespace KK_Archetypes
         internal static MakerCategory FavoritesSubCat;
 
         // Flags for showing UI menus
-        internal static bool showAvancedGUI { get; set; }
+        internal static bool showAdvancedGUI { get; set; }
         internal static bool showLoadGUI { get; set; } // Remnant from implementation of LoadToggles. Left for possible later implementation.
 
         // Quick reference to Ctrl+Shift hotkey combination
@@ -30,20 +30,21 @@ namespace KK_Archetypes
 
         // GUI Menu parameters
         internal static Vector2 _scrollPos;
-        internal static Rect _advWindowRect;
-        internal static Rect _quickWindowRect;
 
-        private static float _xsizeAdv = Screen.width * .237f;
-        private static float _ysizeAdv = Screen.height * .32f;
-        private static float _xposAdv = Screen.width * .078f;
-        private static float _yposAdv = Screen.height * .66f;
+        // Solid backgrounds (don't sue me Marco)
+        private static Texture2D WindowBackground { get; set; }
 
-        private static float _xsizeQuick = Screen.width * .125f;
-        private static float _ysizeQuick = Screen.height * .17f;
-        private static float _xposQuick = Screen.width * .004f;
-        private static float _yposQuick = Screen.height * .28f;
+        internal static int _xsizeAdv { get { return (int) (Screen.width * .237); } }
+        internal static int _ysizeAdv { get { return (int) (Screen.height * .32); } }
+        internal static int _xposAdv { get { return (int) (Screen.width * .078); } }
+        internal static int _yposAdv { get { return (int) (Screen.height * .69); } }
 
-        private static float _quickToggleWidth = (_xsizeQuick - 18) / 2;
+        internal static int _xsizeQuick { get { return (int) (Screen.width * .125); } }
+        internal static int _ysizeQuick { get { return (int) (Screen.height * .17); } }
+        internal static int _xposQuick { get { return (int) (Screen.width * .004); } }
+        internal static int _yposQuick { get { return (int) (Screen.height * .29); } }
+
+        private static int _quickToggleWidth = (int) (_xsizeQuick - 18) / 2;
 
         // Flag for selecting / deselecting all toggles
         private static MakerToggle AllToggle;
@@ -55,10 +56,8 @@ namespace KK_Archetypes
         internal UI()
         {
             KKAT_instance = Singleton<KK_Archetypes>.Instance;
-            showAvancedGUI = false;
+            showAdvancedGUI = false;
             showLoadGUI = true;
-            _advWindowRect = new Rect(_xposAdv, _yposAdv, _xsizeAdv, _ysizeAdv);
-            _quickWindowRect = new Rect(_xposQuick, _yposQuick, _xsizeQuick, _ysizeQuick);
 
             _selectStyle.normal.background = new Texture2D(1,1);
             _selectStyle.normal.background.SetPixel(1, 1, new Color(1, 1, 1, .4f));
@@ -142,7 +141,9 @@ namespace KK_Archetypes
             e.AddControl(new MakerButton("Add Selection To Favorites", FavoritesSubCat, KKAT_instance)).OnClick.AddListener(delegate { AddSelected(); });
             e.AddControl(new MakerButton("Get Random From Favorites", FavoritesSubCat, KKAT_instance)).OnClick.AddListener(delegate { LoadSelected(); });
 
-            e.AddControl(new MakerToggle(FavoritesSubCat, "Show Advanced Favorite Controls", KKAT_instance)).ValueChanged.Subscribe(b => showAvancedGUI = b);
+            e.AddControl(new MakerToggle(FavoritesSubCat, "Show Advanced Favorite Controls", KKAT_instance)).ValueChanged.Subscribe(b => showAdvancedGUI = b);
+
+            e.AddSidebarControl(new SidebarToggle("Show Archetypes Load Menu", false, KKAT_instance)).ValueChanged.Subscribe(b => showLoadGUI = b);
         }
 
         /// <summary>
@@ -417,6 +418,22 @@ namespace KK_Archetypes
             DrawTogglesQuick();
             if (GUILayout.Button("Add from Selected")) AddSelected(true);
             KK_Archetypes.IncrementFlag = GUILayout.Toggle(KK_Archetypes.IncrementFlag, "Jump to next");
+        }
+
+        /// <summary>
+        /// Totally not stolen from Marco...
+        /// </summary>
+        /// <param windowRect>Window rect</param>
+        public static void DrawSolidWindowBackground(Rect windowRect)
+        {
+            if (WindowBackground == null)
+            {
+                var windowBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+                windowBackground.SetPixel(0, 0, new Color(0.84f, 0.84f, 0.84f));
+                windowBackground.Apply();
+                WindowBackground = windowBackground;
+            }
+            GUI.Box(windowRect, GUIContent.none, new GUIStyle { normal = new GUIStyleState { background = WindowBackground } });
         }
     }
 }

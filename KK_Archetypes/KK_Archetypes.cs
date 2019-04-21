@@ -84,10 +84,18 @@ namespace KK_Archetypes
         {
             if (MakerAPI.InsideMaker && Manager.Scene.Instance.NowSceneNames[0] == "CustomScene")
             {
-                if (UI.showAvancedGUI && _parameterGroup.interactable)
-                    UI._advWindowRect = GUILayout.Window(3156121, UI._advWindowRect, UI.AdvancedControls, "Advanced Favorite Controls");
+                if (UI.showAdvancedGUI && _parameterGroup.interactable)
+                {
+                    Rect advWindowRect = new Rect(UI._xposAdv, UI._yposAdv, UI._xsizeAdv, UI._ysizeAdv);
+                    Rect background = new Rect(GUILayout.Window(3156121, advWindowRect, UI.AdvancedControls, "Advanced Favorite Controls"));
+                    UI.DrawSolidWindowBackground(background);
+                }
                 if (UI.showLoadGUI && _systemGroup.interactable && (_loadCharaToggle.isOn || _loadCosToggle.isOn))
-                    UI._quickWindowRect = GUILayout.Window(3156122, UI._quickWindowRect, UI.QuickControls, "Add to Favorites");
+                {
+                    Rect quickWindowRect = new Rect(UI._xposQuick, UI._yposQuick, UI._xsizeQuick, UI._ysizeQuick);
+                    Rect background = new Rect(GUILayout.Window(3156122, quickWindowRect, UI.QuickControls, "Add to Favorites"));
+                    UI.DrawSolidWindowBackground(background);
+                }
             }
         }
 
