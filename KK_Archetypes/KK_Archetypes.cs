@@ -19,7 +19,7 @@ namespace KK_Archetypes
         public const string GUID = "com.cptgrey.bepinex.archetypes";
         public const string PluginName = "KK Character Archetypes";
         public const string PluginNameInternal = "KK_Archetypes";
-        public const string Version = "1.0";
+        public const string Version = "1.0.1";
 
         internal static KKATData Data = KKATData.GetFromFile();
         private static UI _UI = new UI();
