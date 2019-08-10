@@ -48,47 +48,52 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>..\..\..\..\Desktop\Koikatu 5.3\BepInEx\core\0Harmony.dll</HintPath>
+      <HintPath>..\..\lib\0Harmony.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Desktop\Koikatu 5.3\BepInEx\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\lib\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Desktop\Koikatu 5.3\BepInEx\Assembly-CSharp-firstpass.dll</HintPath>
+      <HintPath>..\..\lib\Assembly-CSharp-firstpass.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="BepInEx">
-      <HintPath>..\..\..\..\Desktop\Koikatu 5.3\BepInEx\core\BepInEx.dll</HintPath>
+      <HintPath>..\..\lib\BepInEx.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="ConfigurationManager, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Desktop\Koikatu 5.3\BepInEx\ConfigurationManager.dll</HintPath>
+      <HintPath>..\..\lib\ConfigurationManager.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="ExtensibleSaveFormat, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Desktop\Koikatu 5.3\BepInEx\ExtensibleSaveFormat.dll</HintPath>
+      <HintPath>..\..\BepisPlugins\bin\BepInEx\ExtensibleSaveFormat.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="KKABMGUI, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Desktop\Koikatu 5.3\BepInEx\KKABMGUI.dll</HintPath>
-    </Reference>
-    <Reference Include="KKABMPlugin, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Desktop\Koikatu 5.3\BepInEx\KKABMPlugin.dll</HintPath>
+    <Reference Include="KKABMX">
+      <HintPath>..\..\..\KKEC\KKABMX\bin\KKABMX.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="KKAPI, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Desktop\Koikatu 5.3\BepInEx\KKAPI.dll</HintPath>
+      <HintPath>..\..\..\KKEC\KKAPI\bin\KKAPI.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Desktop\Koikatu 5.3\BepInEx\UnityEngine.dll</HintPath>
+      <HintPath>..\..\lib\UnityEngine.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Desktop\Koikatu 5.3\BepInEx\UnityEngine.UI.dll</HintPath>
+      <HintPath>..\..\lib\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
